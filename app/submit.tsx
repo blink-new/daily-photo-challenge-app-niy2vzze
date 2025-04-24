@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Camera as CameraIcon, Image as ImageIcon, Check, X } from 'lucide-react-native';
 import { Camera, CameraType } from 'expo-camera';
@@ -8,15 +8,22 @@ import Animated, { FadeIn, SlideInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SubmitScreen() {
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [type, setType] = useState(CameraType.back);
   const [photo, setPhoto] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const cameraRef = useRef<Camera>(null);
 
-  // Request camera permission if not granted
-  if (!permission) {
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  // Handle loading state
+  if (hasPermission === null) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#FF6B6B" />
@@ -24,14 +31,21 @@ export default function SubmitScreen() {
     );
   }
 
-  if (!permission.granted) {
+  // Handle permission denied state
+  if (hasPermission === false) {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionTitle}>Camera permission required</Text>
         <Text style={styles.permissionText}>
           We need camera access to let you take photos for the challenge.
         </Text>
-        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+        <TouchableOpacity 
+          style={styles.permissionButton} 
+          onPress={async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasPermission(status === 'granted');
+          }}
+        >
           <Text style={styles.permissionButtonText}>Grant Permission</Text>
         </TouchableOpacity>
       </View>
