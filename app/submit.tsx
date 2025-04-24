@@ -2,14 +2,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import { Camera as CameraIcon, Image as ImageIcon, Check, X } from 'lucide-react-native';
-import { Camera, CameraType } from 'expo-camera';
+import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeIn, SlideInUp } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SubmitScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [type, setType] = useState(CameraType.back);
+  const [type, setType] = useState('back'); // Use string instead of CameraType enum
   const [photo, setPhoto] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,13 +105,13 @@ export default function SubmitScreen() {
         <Camera
           ref={cameraRef}
           style={styles.camera}
-          type={type}
+          type={type as any}
           ratio="1:1"
         >
           <View style={styles.cameraControls}>
             <TouchableOpacity
               style={styles.flipButton}
-              onPress={() => setType(type === CameraType.back ? CameraType.front : CameraType.back)}
+              onPress={() => setType(type === 'back' ? 'front' : 'back')}
             >
               <Text style={styles.flipText}>Flip</Text>
             </TouchableOpacity>
